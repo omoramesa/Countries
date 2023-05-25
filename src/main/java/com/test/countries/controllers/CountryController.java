@@ -1,39 +1,36 @@
 package com.test.countries.controllers;
 
-import com.test.countries.Services.CountryService;
-import com.test.countries.Services.LogService;
 import com.test.countries.models.Country;
-import com.test.countries.repositories.LogRepository;
+import com.test.countries.Services.CountryService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestTemplate;
+import com.test.countries.exception.CountryNotFoundException;
+import com.test.countries.exception.ExceptionResponse;
+
+
 
 @RestController
-@RequestMapping("api")
+@RequestMapping("api/countries")
 public class CountryController {
-    @Autowired
-    private  LogRepository logRepository;
-    @Autowired
-    private  LogService logService;
+
     @Autowired
     private CountryService countryService;
 
-    @GetMapping("/countries")
+    @GetMapping("/all")
     public ResponseEntity<?> getCountries(){
         String response = countryService.getCountries();
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping(value = "/countries/{name}")
-    public ResponseEntity<?> getCountryByName(@PathVariable String name){
-        Country country = countryService.getCountryByName(name);
+    @GetMapping(value = "/name/{name}")
+    public ResponseEntity<?> getCountryByName(@PathVariable String name) {
+        try{
+        Country country = (Country) countryService.getCountryByName(name);
 
             if (country != null) {
                 Country countryInfo = new Country();
@@ -41,8 +38,15 @@ public class CountryController {
                 countryInfo.setPopulation(country.getPopulation());
                 return ResponseEntity.ok(countryInfo);
             }else{
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("El país '" + name + "' no fue encontrado o no existe.");
+                String msg = "El país '" + name + "' no fue encontrado";
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(msg);
             }
+
+        }catch (CountryNotFoundException ex) {
+            ExceptionResponse exceptionResponse = new ExceptionResponse(ex.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse);
+        }
+
 
     }
 }
