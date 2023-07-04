@@ -9,9 +9,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-
 import java.time.LocalDateTime;
 
+//Prueba de git
 public class LogServiceTest {
 
     private LogService logService;
